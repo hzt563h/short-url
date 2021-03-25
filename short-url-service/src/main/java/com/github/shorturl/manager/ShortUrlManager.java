@@ -1,6 +1,7 @@
 package com.github.shorturl.manager;
 
 import com.github.shorturl.domain.ShortUrl;
+import com.github.shorturl.exception.ApiException;
 import com.github.shorturl.filter.BloomFilterHelper;
 import com.github.shorturl.filter.RedisBloomFilter;
 import com.github.shorturl.vo.ShortUrlVO;
@@ -43,7 +44,7 @@ public class ShortUrlManager {
     public ShortUrlVO generateShortUrl(String url) {
         //判断 url 是否是Http https 开头
         if(StringUtils.isBlank(url)){
-            throw new RuntimeException("参数错误");
+            throw new ApiException("参数错误");
         }
         url = StringUtils.trim(url).toLowerCase();
         if(!isStartWithHttpOrHttps(url)){
@@ -58,7 +59,7 @@ public class ShortUrlManager {
 
         while(true){
             if(count > 5){
-                throw new RuntimeException("重试拼接url 超过限制次数");
+                throw new ApiException("重试拼接url 超过限制次数");
             }
             //从 BloomFilter 查看是否存在
             boolean mightContain =  redisBloomFilter.includeByBloomFilter(bloomFilterHelper, "bloom", hash);
@@ -93,7 +94,7 @@ public class ShortUrlManager {
             redisService.set(hash,saveBean,60*60*12);
         } catch (Exception e) {
             log.error("重复插入问题e:",e);
-            throw new RuntimeException("重复插入");
+            throw new ApiException("重复插入");
         }
         return new ShortUrlVO(saveBean.getHashValue(), saveBean.getUrl());
     }

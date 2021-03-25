@@ -1,5 +1,6 @@
 package com.github.shorturl.controller;
 
+import com.github.shorturl.exception.ApiException;
 import com.github.shorturl.manager.ShortUrlManager;
 import com.github.shorturl.vo.ShortUrlVO;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,7 @@ public class RedirectController {
         ShortUrlVO shortUrlVO = shortUrlManager.getRealUrlByHash(hash);
         if(null == shortUrlVO){
             log.error("短链接不存在,hash[{}]", hash);
-            throw new Exception("短链接不存在");
+            throw new ApiException("短链接不存在");
         }
         return Mono.fromRunnable(()->{
             response.setStatusCode(HttpStatus.FOUND);
