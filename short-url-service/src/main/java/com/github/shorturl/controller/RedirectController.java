@@ -1,17 +1,16 @@
 package com.github.shorturl.controller;
 
 import com.github.shorturl.manager.ShortUrlManager;
-import com.github.shorturl.response.ShortUrlVO;
+import com.github.shorturl.vo.ShortUrlVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import java.net.URI;
 
 @RestController
 @Slf4j
@@ -21,14 +20,18 @@ public class RedirectController {
     private ShortUrlManager shortUrlManager;
 
     @GetMapping(value = "/{hash}")
-    public String redirect(HttpServletRequest request, HttpServletResponse response, @PathVariable("hash") String hash) throws IOException {
-        log.info("====================请求地址:[{}]===============" , request.getRequestURL());
+    @ResponseStatus(HttpStatus.FOUND)
+    public Mono<Void> redirect(ServerHttpResponse response, @PathVariable("hash") String hash) throws Exception {
+        //log.info("====================请求地址:[{}]===============" , response.get());
+
         ShortUrlVO shortUrlVO = shortUrlManager.getRealUrlByHash(hash);
         if(null == shortUrlVO){
             log.error("短链接不存在,hash[{}]", hash);
-            return "短链接不存在!";
+            throw new Exception("短链接不存在");
         }
-        response.sendRedirect(shortUrlVO.getUrl());
-        return "";
+        return Mono.fromRunnable(()->{
+            response.setStatusCode(HttpStatus.FOUND);
+            response.getHeaders().setLocation(URI.create(shortUrlVO.getUrl()));
+        });
     }
 }

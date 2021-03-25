@@ -3,8 +3,7 @@ package com.github.shorturl.manager;
 import com.github.shorturl.domain.ShortUrl;
 import com.github.shorturl.filter.BloomFilterHelper;
 import com.github.shorturl.filter.RedisBloomFilter;
-import com.github.shorturl.response.Response;
-import com.github.shorturl.response.ShortUrlVO;
+import com.github.shorturl.vo.ShortUrlVO;
 import com.github.shorturl.service.RedisService;
 import com.github.shorturl.service.ShortUrlService;
 import lombok.extern.slf4j.Slf4j;
@@ -12,11 +11,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,12 +38,9 @@ public class ShortUrlManager {
     @Value("${url.protocol:https}")
     private String URL_PREFIX;
 
-    @Value("${domain}")
-    private String DOMAIN;
-
 
     @Transactional(rollbackFor = Exception.class)
-    public Response<String> generateShortUrl(String url) {
+    public ShortUrlVO generateShortUrl(String url) {
         //判断 url 是否是Http https 开头
         if(StringUtils.isBlank(url)){
             throw new RuntimeException("参数错误");
@@ -67,7 +61,6 @@ public class ShortUrlManager {
                 throw new RuntimeException("重试拼接url 超过限制次数");
             }
             //从 BloomFilter 查看是否存在
-            //boolean mightContain = shortUrlBloomFilter.mightContain(hash);
             boolean mightContain =  redisBloomFilter.includeByBloomFilter(bloomFilterHelper, "bloom", hash);
             if(!mightContain){
                 redisBloomFilter.addByBloomFilter(bloomFilterHelper,"bloom",hash);
@@ -79,7 +72,7 @@ public class ShortUrlManager {
             ShortUrl dbShortUrl = shortUrlService.findByHashValueFromLocalCache(hash);
             if(dbShortUrl.getUrl().equals(url)){
                 log.info("============短链接已存在!===============");
-                return Response.success(DOMAIN + hash);
+                return new ShortUrlVO(dbShortUrl.getHashValue(), dbShortUrl.getUrl());
             }else{
                 log.warn("=======hashValue:[{}],DBUrl:[{}],currentUrl:[{}]",
                         hash,dbShortUrl.getUrl(),url);
@@ -90,10 +83,9 @@ public class ShortUrlManager {
             count++;
             log.info("===========================url重复拼接字符串，次数:[{}]",count);
         }
-
+        ShortUrl saveBean = new ShortUrl();
         try {
             //入库
-            ShortUrl saveBean = new ShortUrl();
             saveBean.setHashValue(hash);
             saveBean.setUrl(url);
             shortUrlService.saveShortUrl(saveBean);
@@ -101,9 +93,9 @@ public class ShortUrlManager {
             redisService.set(hash,saveBean,60*60*12);
         } catch (Exception e) {
             log.error("重复插入问题e:",e);
-            return Response.failed("-1","请重试!");
+            throw new RuntimeException("重复插入");
         }
-        return Response.success(DOMAIN + hash);
+        return new ShortUrlVO(saveBean.getHashValue(), saveBean.getUrl());
     }
 
 

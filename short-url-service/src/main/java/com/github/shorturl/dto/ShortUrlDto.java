@@ -1,4 +1,4 @@
-package com.github.shorturl.request;
+package com.github.shorturl.dto;
 
 
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class GenerateShortUrlRequest {
+public class ShortUrlDto {
     /**
      * 要生成的短链接地址
      */

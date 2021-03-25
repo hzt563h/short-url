@@ -1,15 +1,14 @@
 package com.github.shorturl.controller;
 
 import com.github.shorturl.manager.ShortUrlManager;
-import com.github.shorturl.request.GenerateShortUrlRequest;
+import com.github.shorturl.dto.ShortUrlDto;
 import com.github.shorturl.response.Response;
-import com.github.shorturl.response.ShortUrlVO;
+import com.github.shorturl.vo.ShortUrlVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/d")
@@ -18,15 +17,17 @@ public class IndexController {
 
     @Autowired
     private ShortUrlManager shortUrlManager;
+    @Value("${domain}")
+    private String DOMAIN;
 
     @PostMapping("/generateShortUrl")
     @ResponseBody
-    public Response<String> generateShortUrl(@RequestBody @Valid GenerateShortUrlRequest request) {
+    public Response<String> generateShortUrl(@RequestBody ShortUrlDto request) {
         if(!shortUrlManager.isValidUrl(request.getUrl())){
             log.error("无效的url:[{}]",request.getUrl());
            return Response.failed("-1", "无效的url");
         }
-        return shortUrlManager.generateShortUrl(request.getUrl());
+        return Response.success(DOMAIN+shortUrlManager.generateShortUrl(request.getUrl()).getHashValue());
     }
 
     @GetMapping("/getByHash/{hashValue}")

@@ -8,7 +8,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
 @MapperScan("com.github.shorturl.mapper")
-@ServletComponentScan
 @EnableDiscoveryClient
 public class StartApplication {
 

@@ -1,4 +1,4 @@
-package com.github.shorturl.response;
+package com.github.shorturl.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
