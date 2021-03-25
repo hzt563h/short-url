@@ -1,0 +1,13 @@
+//Sentinel持久化配置
+
+[
+  {
+    "resource": "/d/generateShortUrl", //资源名称
+    "limitApp": "default",//来源应用
+    "grade": 1,//阈值类型，0表示线程数，1表示QPS
+    "count": 100,//单机阈值
+    "strategy": 0,//流控模式，0表示直接，1表示关联，2表示链路
+    "controlBehavior": 0,//流控效果，0表示快速失败，1表示Warm Up，2表示排队等待
+    "clusterMode": false //是否集群
+  }
+]

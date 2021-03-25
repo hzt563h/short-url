@@ -1,0 +1,8 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: short-url-service
+          uri: lb://short-url-service
+          predicates:
+            - Path=/d/**

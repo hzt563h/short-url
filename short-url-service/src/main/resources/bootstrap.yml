@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: short-url-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #服务注册中心地址
+      config:
+        server-addr: localhost:8848 #配置中心地址
+        file-extension: yaml #指定yaml格式的配置
+        group: DEFAULT_GROUP
+        namespace: 0606dc29-b43e-4b0a-a973-548150877d70
+    sentinel:
+      transport:
+        dashboard: localhost:8858 #配置Sentinel dashboard地址
+        port: 8719
+      datasource:
+        ds1:
+          nacos:
+            server-addr: localhost:8848
+            dataId: cloudalibaba-sentinel-service
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: flow
+            namespace: 0606dc29-b43e-4b0a-a973-548150877d70
+#DataId=${spring.application.name}-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

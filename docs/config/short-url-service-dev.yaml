@@ -1,0 +1,22 @@
+domain: http://localhost:9528/d/
+mybatis-plus:
+  mapper-locations: classpath*:mappers/*.xml
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    password: 123456
+    url: jdbc:mysql://localhost:3306/short_links?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=true&verifyServerCertificate=false&serverTimezone=GMT%2b8
+    username: root
+  redis:
+    database: 3
+    host: localhost
+    jedis:
+      pool:
+        max-idle: 100
+        max-wait: -1ms
+        min-idle: 2
+    password: 123456
+    port: 6379
+    timeout: 2000ms
+url:
+  protocol: https
