@@ -1,8 +1,9 @@
 package com.github.shorturl.controller;
 
+import com.github.shorturl.api.CommonResult;
+import com.github.shorturl.exception.ApiException;
 import com.github.shorturl.manager.ShortUrlManager;
 import com.github.shorturl.dto.ShortUrlDto;
-import com.github.shorturl.response.Response;
 import com.github.shorturl.vo.ShortUrlVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,23 +23,23 @@ public class IndexController {
 
     @PostMapping("/generateShortUrl")
     @ResponseBody
-    public Response<String> generateShortUrl(@RequestBody ShortUrlDto request) {
+    public CommonResult<String> generateShortUrl(@RequestBody ShortUrlDto request) {
         if(!shortUrlManager.isValidUrl(request.getUrl())){
             log.error("无效的url:[{}]",request.getUrl());
-           return Response.failed("-1", "无效的url");
+           throw new ApiException("无效的url");
         }
-        return Response.success(DOMAIN+shortUrlManager.generateShortUrl(request.getUrl()).getHashValue());
+        return CommonResult.success(DOMAIN+shortUrlManager.generateShortUrl(request.getUrl()).getHashValue());
     }
 
     @GetMapping("/getByHash/{hashValue}")
     @ResponseBody
-    public Response<String> getByHash(@PathVariable("hashValue") String hash) {
+    public CommonResult<String> getByHash(@PathVariable("hashValue") String hash) {
         log.info("====================请求hash:[{}]===============" , hash);
         ShortUrlVO shortUrlVO = shortUrlManager.getRealUrlByHash(hash);
         if(null == shortUrlVO){
             log.error("短链接不存在,hash[{}]", hash);
-            return Response.failed("-1", "短链接不存在");
+            throw new ApiException("短链接不存在");
         }
-        return Response.success(shortUrlVO.getUrl());
+        return CommonResult.success(shortUrlVO.getUrl());
     }
 }
