@@ -8,10 +8,9 @@ import com.github.shorturl.vo.ShortUrlVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequestMapping("/d")
 @Slf4j
 public class IndexController {
@@ -22,7 +21,7 @@ public class IndexController {
     private String DOMAIN;
 
     @PostMapping("/generateShortUrl")
-    @ResponseBody
+
     public CommonResult<String> generateShortUrl(@RequestBody ShortUrlDto request) {
         if(!shortUrlManager.isValidUrl(request.getUrl())){
             log.error("无效的url:[{}]",request.getUrl());
@@ -32,7 +31,6 @@ public class IndexController {
     }
 
     @GetMapping("/getByHash/{hashValue}")
-    @ResponseBody
     public CommonResult<String> getByHash(@PathVariable("hashValue") String hash) {
         log.info("====================请求hash:[{}]===============" , hash);
         ShortUrlVO shortUrlVO = shortUrlManager.getRealUrlByHash(hash);
